@@ -1,0 +1,7 @@
+ldap_url = "ldaps://example.com"
+ldap_base_dn = "ou=accounts,dc=example,dc=com"
+
+ldap_auth_type = "simple"
+ldap_bind_dn = "cn=example,ou=accounts,dc=example,dc=com"
+ldap_bind_pwd = "bad-password"
+ldap_user_filter = "(uid=%s)"

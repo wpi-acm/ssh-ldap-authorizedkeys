@@ -25,11 +25,24 @@ func main() {
 	}
 	defer l.Close()
 
-	err = l.UnauthenticatedBind("")
-	if err != nil {
-		log.Fatal(err)
+	if conf.AuthType != "simple" {
+		err = l.UnauthenticatedBind("")
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		br := ldap.NewSimpleBindRequest(conf.BindDn, conf.BindPw, nil)
+		_, err := l.SimpleBind(br)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	filter := fmt.Sprintf("(uid=%s)", os.Args[2])
+	var filter string
+	if conf.UserFilter == "" {
+		filter = fmt.Sprintf("(uid=%s)", os.Args[2])
+	} else {
+		filter = fmt.Sprintf(conf.UserFilter, os.Args[2])
+	}
 	sr := ldap.NewSearchRequest(conf.BaseDn, 2, 0, 1, 30, false, filter, []string{"sshPublicKey"}, nil)
 
 	res, err := l.Search(sr)
@@ -46,6 +59,10 @@ func main() {
 }
 
 type Config struct {
-	LdapUrl string `toml:"ldap_url"`
-	BaseDn  string `toml:"ldap_base_dn"`
+	LdapUrl    string `toml:"ldap_url"`
+	BaseDn     string `toml:"ldap_base_dn"`
+	AuthType   string `toml:"ldap_auth_type"`
+	BindDn     string `toml:"ldap_bind_dn"`
+	BindPw     string `toml:"ldap_bind_pw"`
+	UserFilter string `toml:"ldap_user_filter"`
 }
